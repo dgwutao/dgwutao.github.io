@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文章详情页 - IT之家</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+    
+    :root {
+      --primary: #e1251b;
+      --secondary: #333;
+      --light: #f5f5f5;
+      --dark: #222;
+      --gray: #777;
+      --light-gray: #eee;
+    }
+    
+    body {
+      background-color: #f8f8f8;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* 导航栏样式 */
+    header {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .nav-links {
+      display: flex;
+      list-style: none;
+    }
+    
+    .nav-links li {
+      margin-left: 25px;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: var(--secondary);
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+    
+    /* 面包屑导航 */
+    .breadcrumb {
+      padding: 15px 0;
+      font-size: 14px;
+      color: var(--gray);
+    }
+    
+    .breadcrumb a {
+      color: var(--gray);
+      text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+    
+    /* 文章区域 */
+    .article-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+      margin: 30px 0;
+      padding: 40px;
+      position: relative;
+    }
+    
+    .article-header {
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--light-gray);
+      padding-bottom: 20px;
+    }
+    
+    .article-title {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 15px;
+      color: var(--dark);
+    }
+    
+    .article-meta {
+      display: flex;
+      align-items: center;
+      color: var(--gray);
+      font-size: 14px;
+    }
+    
+    .article-meta span {
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .article-meta i {
+      margin-right: 5px;
+    }
+    
+    .article-content {
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    
+    .article-content p {
+      margin-bottom: 20px;
+    }
+    
+    .article-content h3 {
+      margin: 30px 0 15px;
+      font-size: 22px;
+      color: var(--dark);
+    }
+    
+    .article-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 25px 0;
+    }
+    
+    /* ID显示区域 */
+    .id-display {
+      background: var(--light);
+      border-left: 4px solid var(--primary);
+      padding: 15px 20px;
+      margin: 30px 0;
+      border-radius: 4px;
+    }
+    
+    .id-display h3 {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    
+    .id-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+    
+    .url-info {
+      background: var(--light);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-size: 14px;
+      overflow-x: auto;
+    }
+    
+    /* 技术实现说明 */
+    .tech-explanation {
+      background: #f0f7ff;
+      border-radius: 8px;
+      padding: 25px;
+      margin: 40px 0;
+      border-left: 4px solid #4a90e2;
+    }
+    
+    .tech-explanation h3 {
+      margin-bottom: 15px;
+      color: #2c6eb5;
+    }
+    
+    .tech-explanation ul {
+      padding-left: 20px;
+      margin-bottom: 15px;
+    }
+    
+    .tech-explanation li {
+      margin-bottom: 10px;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .nav-links {
+        margin-top: 15px;
+      }
+      
+      .nav-links li {
+        margin: 0 10px 0 0;
+      }
+      
+      .article-container {
+        padding: 25px 20px;
+      }
+      
+      .article-title {
+        font-size: 24px;
+      }
+      
+      .article-image {
+        height: 250px;
+      }
+      
+      .article-meta {
+        flex-wrap: wrap;
+      }
+      
+      .article-meta span {
+        margin: 0 15px 5px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <header>
+    <div class="container">
+      <nav class="navbar">
+        <a href="/" class="logo">IT之家</a>
+        <ul class="nav-links">
+          <li><a href="#">首页</a></li>
+          <li><a href="#">新闻</a></li>
+          <li><a href="#">评测</a></li>
+          <li><a href="#">应用</a></li>
+          <li><a href="#">游戏</a></li>
+          <li><a href="#">视频</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <!-- 面包屑导航 -->
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/">首页</a> &gt; 
+      <a href="/0/">分类</a> &gt; 
+      <a href="/0/863/">子分类</a> &gt; 
+      <span>文章详情</span>
+    </div>
+  </div>
+  
+  <!-- 文章内容区域 -->
+  <div class="container">
+    <div class="article-container">
+      <div class="article-header">
+        <h1 class="article-title" id="article-title">从URL中获取ID参数的技术实现</h1>
+        <div class="article-meta">
+          <span><i class="fas fa-user"></i> 技术小编</span>
+          <span><i class="far fa-clock"></i> 2023-11-15</span>
+          <span><i class="far fa-eye"></i> 1528次浏览</span>
+          <span><i class="far fa-comments"></i> 24条评论</span>
+        </div>
+      </div>
+      
+      <div class="id-display">
+        <h3>当前文章ID</h3>
+        <div class="id-value" id="id-display">正在获取...</div>
+      </div>
+      
+      <div class="url-info">
+        <p>当前URL: <span id="current-url"></span></p>
+      </div>
+      
+      <div class="article-content">
+        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="编程技术" class="article-image">
+        
+        <p>在现代Web开发中，经常需要从URL中提取参数来实现动态内容展示。本文将展示如何从类似 <code>https://www.example.com/0/863/475.htm</code> 的URL中提取ID参数。</p>
+        
+        <h3>URL结构分析</h3>
+        <p>上述URL的结构可以分解为：</p>
+        <ul>
+          <li><strong>https://www.example.com</strong> - 域名</li>
+          <li><strong>/0/</strong> - 分类ID</li>
+          <li><strong>/863/</strong> - 子分类ID</li>
+          <li><strong>/475.htm</strong> - 文章ID</li>
+        </ul>
+        
+        <p>我们的目标是从URL中提取出文章ID（本例中为475），并在页面中展示。</p>
+        
+        <div class="tech-explanation">
+          <h3>技术实现说明</h3>
+          <p>在JavaScript中，我们可以使用以下方法提取URL中的ID：</p>
+          <ul>
+            <li>使用 <code>window.location.pathname</code> 获取URL路径</li>
+            <li>使用 <code>split('/')</code> 方法分割路径</li>
+            <li>获取路径的最后一部分</li>
+            <li>使用 <code>replace('.htm', '')</code> 移除扩展名</li>
+          </ul>
+          <p>示例代码：</p>
+          <pre>const path = window.location.pathname; // 例如："/0/863/475.htm"
+const parts = path.split('/'); // 分割路径
+const lastPart = parts[parts.length - 1]; // 获取最后一部分 "475.htm"
+const id = lastPart.replace('.htm', ''); // 移除扩展名得到ID</pre>
+        </div>
+        
+        <h3>实际应用场景</h3>
+        <p>获取到ID后，我们可以：</p>
+        <ol>
+          <li>向服务器请求该ID对应的文章内容</li>
+          <li>在页面上展示个性化内容</li>
+          <li>记录用户访问行为</li>
+          <li>实现相关文章推荐</li>
+        </ol>
+        
+        <p>这种URL结构在内容管理系统(CMS)中非常常见，它既有利于SEO优化，又能清晰地表达内容层次结构。</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 从URL中提取ID参数
+    function extractIdFromUrl() {
+      // 获取当前页面URL的路径部分
+      const path = window.location.pathname;
+      
+      // 显示当前URL
+      document.getElementById('current-url').textContent = window.location.href;
+      
+      // 分割路径
+      const parts = path.split('/');
+      
+      // 确保路径有效
+      if (parts.length < 2) {
+        return null;
+      }
+      
+      // 获取路径的最后一部分
+      const lastPart = parts[parts.length - 1];
+      
+      // 移除扩展名（如.htm）
+      const id = lastPart.replace('.htm', '').replace('.html', '');
+      
+      // 检查是否为数字
+      if (!/^\d+$/.test(id)) {
+        return null;
+      }
+      
+      return id;
+    }
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 提取ID
+      const articleId = extractIdFromUrl();
+      
+      // 更新页面内容
+      const idDisplay = document.getElementById('id-display');
+      
+      if (articleId) {
+        idDisplay.textContent = articleId;
+        
+        // 更新文章标题
+        document.getElementById('article-title').textContent = 
+          `技术文章ID: ${articleId} - 从URL中获取参数的技术实现`;
+      } else {
+        idDisplay.textContent = "未获取到有效ID";
+        idDisplay.style.color = "#e1251b";
+      }
+      
+      // 模拟从服务器获取文章内容
+      setTimeout(() => {
+        if (articleId) {
+          // 这里实际应该发起AJAX请求获取文章内容
+          console.log(`请求文章ID: ${articleId} 的内容...`);
+        }
+      }, 1000);
+    });
+    
+    // 模拟URL参数
+    function setUrlParam(id) {
+      window.history.pushState({}, '', `/${Math.floor(Math.random()*10)}/${Math.floor(Math.random()*1000)}/${id}.htm`);
+      location.reload();
+    }
+  </script>
+</body>
+</html>
