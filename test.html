@@ -1,411 +1,555 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>文章详情页 - IT之家</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-    }
-    
-    :root {
-      --primary: #e1251b;
-      --secondary: #333;
-      --light: #f5f5f5;
-      --dark: #222;
-      --gray: #777;
-      --light-gray: #eee;
-    }
-    
-    body {
-      background-color: #f8f8f8;
-      color: #333;
-      line-height: 1.6;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    
-    /* 导航栏样式 */
-    header {
-      background-color: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 0;
-    }
-    
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary);
-      text-decoration: none;
-    }
-    
-    .nav-links {
-      display: flex;
-      list-style: none;
-    }
-    
-    .nav-links li {
-      margin-left: 25px;
-    }
-    
-    .nav-links a {
-      text-decoration: none;
-      color: var(--secondary);
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-    
-    .nav-links a:hover {
-      color: var(--primary);
-    }
-    
-    /* 面包屑导航 */
-    .breadcrumb {
-      padding: 15px 0;
-      font-size: 14px;
-      color: var(--gray);
-    }
-    
-    .breadcrumb a {
-      color: var(--gray);
-      text-decoration: none;
-    }
-    
-    .breadcrumb a:hover {
-      text-decoration: underline;
-    }
-    
-    /* 文章区域 */
-    .article-container {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-      margin: 30px 0;
-      padding: 40px;
-      position: relative;
-    }
-    
-    .article-header {
-      margin-bottom: 30px;
-      border-bottom: 1px solid var(--light-gray);
-      padding-bottom: 20px;
-    }
-    
-    .article-title {
-      font-size: 28px;
-      font-weight: 700;
-      line-height: 1.3;
-      margin-bottom: 15px;
-      color: var(--dark);
-    }
-    
-    .article-meta {
-      display: flex;
-      align-items: center;
-      color: var(--gray);
-      font-size: 14px;
-    }
-    
-    .article-meta span {
-      margin-right: 20px;
-      display: flex;
-      align-items: center;
-    }
-    
-    .article-meta i {
-      margin-right: 5px;
-    }
-    
-    .article-content {
-      font-size: 16px;
-      line-height: 1.8;
-    }
-    
-    .article-content p {
-      margin-bottom: 20px;
-    }
-    
-    .article-content h3 {
-      margin: 30px 0 15px;
-      font-size: 22px;
-      color: var(--dark);
-    }
-    
-    .article-image {
-      width: 100%;
-      height: 400px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin: 25px 0;
-    }
-    
-    /* ID显示区域 */
-    .id-display {
-      background: var(--light);
-      border-left: 4px solid var(--primary);
-      padding: 15px 20px;
-      margin: 30px 0;
-      border-radius: 4px;
-    }
-    
-    .id-display h3 {
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-    
-    .id-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary);
-    }
-    
-    .url-info {
-      background: var(--light);
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0;
-      font-size: 14px;
-      overflow-x: auto;
-    }
-    
-    /* 技术实现说明 */
-    .tech-explanation {
-      background: #f0f7ff;
-      border-radius: 8px;
-      padding: 25px;
-      margin: 40px 0;
-      border-left: 4px solid #4a90e2;
-    }
-    
-    .tech-explanation h3 {
-      margin-bottom: 15px;
-      color: #2c6eb5;
-    }
-    
-    .tech-explanation ul {
-      padding-left: 20px;
-      margin-bottom: 15px;
-    }
-    
-    .tech-explanation li {
-      margin-bottom: 10px;
-    }
-    
-    /* 响应式设计 */
-    @media (max-width: 768px) {
-      .navbar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .nav-links {
-        margin-top: 15px;
-      }
-      
-      .nav-links li {
-        margin: 0 10px 0 0;
-      }
-      
-      .article-container {
-        padding: 25px 20px;
-      }
-      
-      .article-title {
-        font-size: 24px;
-      }
-      
-      .article-image {
-        height: 250px;
-      }
-      
-      .article-meta {
-        flex-wrap: wrap;
-      }
-      
-      .article-meta span {
-        margin: 0 15px 5px 0;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纯HTML/CSS/JavaScript开发示例</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --success-color: #4cc9f0;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-theme {
+            --text-color: #f8f9fa;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(20deg);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 1rem;
+            background: linear-gradient(120deg, #e0e7ff, #d0ebff);
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            color: #555;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header i {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            margin-bottom: 1.5rem;
+            color: #666;
+        }
+
+        .dark-theme .card p {
+            color: #ccc;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .interactive-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 3rem;
+        }
+
+        .interactive-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .counter-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .counter {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: rgba(67, 97, 238, 0.05);
+            border-radius: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .error {
+            color: #e63946;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .form-message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .success {
+            background: rgba(76, 201, 240, 0.2);
+            color: #1d3557;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #666;
+        }
+
+        .dark-theme .footer {
+            color: #aaa;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .counter-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .counter {
+                font-size: 3rem;
+            }
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .loader .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(67, 97, 238, 0.2);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <!-- 导航栏 -->
-  <header>
-    <div class="container">
-      <nav class="navbar">
-        <a href="/" class="logo">IT之家</a>
-        <ul class="nav-links">
-          <li><a href="#">首页</a></li>
-          <li><a href="#">新闻</a></li>
-          <li><a href="#">评测</a></li>
-          <li><a href="#">应用</a></li>
-          <li><a href="#">游戏</a></li>
-          <li><a href="#">视频</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-  
-  <!-- 面包屑导航 -->
-  <div class="container">
-    <div class="breadcrumb">
-      <a href="/">首页</a> &gt; 
-      <a href="/0/">分类</a> &gt; 
-      <a href="/0/863/">子分类</a> &gt; 
-      <span>文章详情</span>
-    </div>
-  </div>
-  
-  <!-- 文章内容区域 -->
-  <div class="container">
-    <div class="article-container">
-      <div class="article-header">
-        <h1 class="article-title" id="article-title">从URL中获取ID参数的技术实现</h1>
-        <div class="article-meta">
-          <span><i class="fas fa-user"></i> 技术小编</span>
-          <span><i class="far fa-clock"></i> 2023-11-15</span>
-          <span><i class="far fa-eye"></i> 1528次浏览</span>
-          <span><i class="far fa-comments"></i> 24条评论</span>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-code"></i>
+                <span>纯前端开发</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
-      </div>
-      
-      <div class="id-display">
-        <h3>当前文章ID</h3>
-        <div class="id-value" id="id-display">正在获取...</div>
-      </div>
-      
-      <div class="url-info">
-        <p>当前URL: <span id="current-url"></span></p>
-      </div>
-      
-      <div class="article-content">
-        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" alt="编程技术" class="article-image">
-        
-        <p>在现代Web开发中，经常需要从URL中提取参数来实现动态内容展示。本文将展示如何从类似 <code>https://www.example.com/0/863/475.htm</code> 的URL中提取ID参数。</p>
-        
-        <h3>URL结构分析</h3>
-        <p>上述URL的结构可以分解为：</p>
-        <ul>
-          <li><strong>https://www.example.com</strong> - 域名</li>
-          <li><strong>/0/</strong> - 分类ID</li>
-          <li><strong>/863/</strong> - 子分类ID</li>
-          <li><strong>/475.htm</strong> - 文章ID</li>
-        </ul>
-        
-        <p>我们的目标是从URL中提取出文章ID（本例中为475），并在页面中展示。</p>
-        
-        <div class="tech-explanation">
-          <h3>技术实现说明</h3>
-          <p>在JavaScript中，我们可以使用以下方法提取URL中的ID：</p>
-          <ul>
-            <li>使用 <code>window.location.pathname</code> 获取URL路径</li>
-            <li>使用 <code>split('/')</code> 方法分割路径</li>
-            <li>获取路径的最后一部分</li>
-            <li>使用 <code>replace('.htm', '')</code> 移除扩展名</li>
-          </ul>
-          <p>示例代码：</p>
-          <pre>const path = window.location.pathname; // 例如："/0/863/475.htm"
-const parts = path.split('/'); // 分割路径
-const lastPart = parts[parts.length - 1]; // 获取最后一部分 "475.htm"
-const id = lastPart.replace('.htm', ''); // 移除扩展名得到ID</pre>
-        </div>
-        
-        <h3>实际应用场景</h3>
-        <p>获取到ID后，我们可以：</p>
-        <ol>
-          <li>向服务器请求该ID对应的文章内容</li>
-          <li>在页面上展示个性化内容</li>
-          <li>记录用户访问行为</li>
-          <li>实现相关文章推荐</li>
-        </ol>
-        
-        <p>这种URL结构在内容管理系统(CMS)中非常常见，它既有利于SEO优化，又能清晰地表达内容层次结构。</p>
-      </div>
-    </div>
-  </div>
+    </header>
 
-  <script>
-    // 从URL中提取ID参数
-    function extractIdFromUrl() {
-      // 获取当前页面URL的路径部分
-      const path = window.location.pathname;
-      
-      // 显示当前URL
-      document.getElementById('current-url').textContent = window.location.href;
-      
-      // 分割路径
-      const parts = path.split('/');
-      
-      // 确保路径有效
-      if (parts.length < 2) {
-        return null;
-      }
-      
-      // 获取路径的最后一部分
-      const lastPart = parts[parts.length - 1];
-      
-      // 移除扩展名（如.htm）
-      const id = lastPart.replace('.htm', '').replace('.html', '');
-      
-      // 检查是否为数字
-      if (!/^\d+$/.test(id)) {
-        return null;
-      }
-      
-      return id;
-    }
-    
-    // 页面加载完成后执行
-    document.addEventListener('DOMContentLoaded', function() {
-      // 提取ID
-      const articleId = extractIdFromUrl();
-      
-      // 更新页面内容
-      const idDisplay = document.getElementById('id-display');
-      
-      if (articleId) {
-        idDisplay.textContent = articleId;
-        
-        // 更新文章标题
-        document.getElementById('article-title').textContent = 
-          `技术文章ID: ${articleId} - 从URL中获取参数的技术实现`;
-      } else {
-        idDisplay.textContent = "未获取到有效ID";
-        idDisplay.style.color = "#e1251b";
-      }
-      
-      // 模拟从服务器获取文章内容
-      setTimeout(() => {
-        if (articleId) {
-          // 这里实际应该发起AJAX请求获取文章内容
-          console.log(`请求文章ID: ${articleId} 的内容...`);
+    <section class="hero">
+        <div class="container">
+            <h1>纯HTML/CSS/JavaScript开发</h1>
+            <p>无需框架或库，使用原生技术构建现代化、响应式且功能丰富的Web应用程序。</p>
+            <button class="btn" id="exploreBtn">探索功能 <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="features">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>响应式设计</h3>
+                </div>
+                <div class="card-content">
+                    <p>使用CSS媒体查询和弹性布局创建在手机、平板和桌面设备上完美显示的界面。</p>
+                    <button class="btn card-btn">了解更多</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-palette"></i>
+                    <h3>主题切换</h3>
+                </div>
+                <div class="card-content">
+                    <p>通过CSS变量和JavaScript实现深色/浅色模式切换，提升用户体验。</p>
+                    <button class="btn card-btn">了解更多</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-magic"></i>
+                    <h3>动画效果</h3>
+                </div>
+                <div class="card-content">
+                    <p>使用CSS过渡、变换和关键帧动画为您的界面添加流畅的交互体验。</p>
+                    <button class="btn card-btn">了解更多</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="interactive-section">
+            <h2>交互式功能演示</h2>
+            
+            <div class="counter-container">
+                <button class="btn" id="decrementBtn"><i class="fas fa-minus"></i></button>
+                <div class="counter" id="counter">0</div>
+                <button class="btn" id="incrementBtn"><i class="fas fa-plus"></i></button>
+            </div>
+
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="name">姓名</label>
+                    <input type="text" id="name" placeholder="请输入您的姓名">
+                    <div class="error" id="nameError">请输入有效的姓名</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">电子邮箱</label>
+                    <input type="email" id="email" placeholder="example@email.com">
+                    <div class="error" id="emailError">请输入有效的邮箱地址</div>
+                </div>
+                
+                <button class="btn" id="submitBtn" style="width:100%">提交表单</button>
+                
+                <div class="loader" id="loader">
+                    <div class="spinner"></div>
+                </div>
+                
+                <div class="form-message success" id="successMessage">
+                    表单提交成功！感谢您的参与。
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2023 纯HTML/CSS/JavaScript开发示例 | 使用原生Web技术构建</p>
+        </div>
+    </footer>
+
+    <script>
+        // DOM元素
+        const themeToggle = document.getElementById('themeToggle');
+        const counterElement = document.getElementById('counter');
+        const incrementBtn = document.getElementById('incrementBtn');
+        const decrementBtn = document.getElementById('decrementBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const nameError = document.getElementById('nameError');
+        const emailError = document.getElementById('emailError');
+        const loader = document.getElementById('loader');
+        const successMessage = document.getElementById('successMessage');
+        const exploreBtn = document.getElementById('exploreBtn');
+        const cardButtons = document.querySelectorAll('.card-btn');
+
+        // 计数器状态
+        let count = 0;
+
+        // 主题切换功能
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            const icon = themeToggle.querySelector('i');
+            if (document.body.classList.contains('dark-theme')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // 计数器功能
+        incrementBtn.addEventListener('click', () => {
+            count++;
+            counterElement.textContent = count;
+            counterElement.style.color = getCounterColor();
+        });
+
+        decrementBtn.addEventListener('click', () => {
+            if (count > 0) {
+                count--;
+                counterElement.textContent = count;
+                counterElement.style.color = getCounterColor();
+            }
+        });
+
+        function getCounterColor() {
+            if (count > 10) return '#4caf50';
+            if (count > 5) return '#ff9800';
+            return '#4361ee';
         }
-      }, 1000);
-    });
-    
-    // 模拟URL参数
-    function setUrlParam(id) {
-      window.history.pushState({}, '', `/${Math.floor(Math.random()*10)}/${Math.floor(Math.random()*1000)}/${id}.htm`);
-      location.reload();
-    }
-  </script>
+
+        // 表单验证
+        function validateForm() {
+            let isValid = true;
+            
+            // 验证姓名
+            if (nameInput.value.trim() === '' || nameInput.value.length < 2) {
+                nameError.style.display = 'block';
+                isValid = false;
+            } else {
+                nameError.style.display = 'none';
+            }
+            
+            // 验证邮箱
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailInput.value)) {
+                emailError.style.display = 'block';
+                isValid = false;
+            } else {
+                emailError.style.display = 'none';
+            }
+            
+            return isValid;
+        }
+
+        // 表单提交
+        submitBtn.addEventListener('click', () => {
+            if (validateForm()) {
+                // 显示加载动画
+                loader.style.display = 'block';
+                
+                // 模拟API请求延迟
+                setTimeout(() => {
+                    // 隐藏加载动画
+                    loader.style.display = 'none';
+                    
+                    // 显示成功消息
+                    successMessage.style.display = 'block';
+                    
+                    // 重置表单
+                    nameInput.value = '';
+                    emailInput.value = '';
+                    
+                    // 3秒后隐藏成功消息
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
+                }, 1500);
+            }
+        });
+
+        // 探索按钮动画
+        exploreBtn.addEventListener('click', () => {
+            exploreBtn.innerHTML = '滚动查看功能 <i class="fas fa-arrow-down"></i>';
+            
+            // 滚动到交互部分
+            document.querySelector('.interactive-section').scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+
+        // 卡片按钮效果
+        cardButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const card = this.closest('.card');
+                card.style.transform = 'scale(0.95)';
+                card.style.boxShadow = '0 2px 15px rgba(0, 0, 0, 0.1)';
+                
+                setTimeout(() => {
+                    card.style.transform = '';
+                    card.style.boxShadow = '';
+                }, 300);
+            });
+        });
+
+        // 页面加载时随机计数器值
+        window.addEventListener('load', () => {
+            count = Math.floor(Math.random() * 20);
+            counterElement.textContent = count;
+            counterElement.style.color = getCounterColor();
+        });
+    </script>
 </body>
 </html>

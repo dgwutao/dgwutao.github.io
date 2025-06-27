@@ -1,7 +1,4 @@
-// web component
-// function showAlert(){
-//     alert("i am alert from headerComponent")  
-// }
+
 const showAlert = ()=>{
   // alert("i am alert from headerComponent")  
   this.dispatchEvent(new CustomEvent('showAlert_', { 
@@ -14,14 +11,7 @@ const showAlert = ()=>{
 class CustomFooter extends HTMLElement {
   constructor() {
     super();
-    // this.name = 'World';
-    // this.triggerEvent = this.triggerEvent.bind(this);
   }
-
-  // triggerEvent() {
-  //   const event = new CustomEvent('showAlert', { detail: { message: 'Hello, World!' } });
-  //   this.dispatchEvent(event); 
-  // }
   
   // component attributes
   static get observedAttributes() {
@@ -36,12 +26,7 @@ class CustomFooter extends HTMLElement {
   
   // connect component
   connectedCallback() {
-    // let template = document.getElementById("my-paragraph").content;
     const shadow = this.attachShadow({ mode: 'closed' });
-    // document.addEventListener('showAlert', (event) => {
-    //   alert("i am alert!")
-    // });
-    // shadow.appendChild(template.cloneNode(true))
     const html = `
     <link rel="stylesheet" href="/static/css/fontawesome/css/all.min.css">
     <link href="/static/css/google-fonts.css" rel="stylesheet">

@@ -27,5 +27,8 @@ axios$.interceptors.response.use(function (response) {
 
 export function test(){
     console.log("from test of requestjs")
+    const map = {
+        test:''
+    }
 }
 

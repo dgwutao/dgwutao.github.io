@@ -13,6 +13,7 @@ function detectDevice() {
   const screenWidth = window.screen.width;
   const isSmallScreen = screenWidth < 768;
   
+  console.log('detectDevice')
   // 综合判断设备类型
   if (isMobile || isSmallScreen) {
     return 'mobile';
@@ -24,13 +25,12 @@ function detectDevice() {
 }
 
 // 执行设备检测并跳转
-const deviceType = detectDevice();
+// const deviceType = detectDevice();
 
-if (deviceType === 'mobile') {
-  window.location.href = 'mobile.html';
-} else if (deviceType === 'tablet') {
-  // 平板设备可以跳转到移动版或桌面版
-  window.location.href = 'tablet.html';
-} else {
-  window.location.href = 'desktop.html';
-}
+// if (deviceType === 'mobile') {
+//   window.location.href = 'mobile.html';
+// } else if (deviceType === 'tablet') {
+//   window.location.href = 'tablet.html';
+// } else {
+//   window.location.href = 'desktop.html';
+// }

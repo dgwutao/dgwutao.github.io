@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript模块加载器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #4cc9f0;
+            --success: #4ade80;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            color: #1e293b;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin: 2rem 0 3rem;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #475569;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .panel-title i {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        .panel-title h2 {
+            font-size: 1.8rem;
+        }
+
+        .module-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .module-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 2px solid #e2e8f0;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .module-card.loaded {
+            border-color: var(--success);
+            background: rgba(76, 222, 128, 0.1);
+        }
+
+        .module-card.failed {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .module-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .module-card.loaded .module-icon {
+            color: var(--success);
+        }
+
+        .module-card.failed .module-icon {
+            color: var(--danger);
+        }
+
+        .module-name {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .module-status {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .dependency-graph {
+            height: 400px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 1.5rem;
+        }
+
+        .canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #dependencyCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .console {
+            background: #0f172a;
+            color: #cbd5e1;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 1.5rem;
+        }
+
+        .console-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: #94a3b8;
+        }
+
+        .console-line {
+            padding: 5px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .console-line.success {
+            color: #4ade80;
+        }
+
+        .console-line.error {
+            color: #f87171;
+        }
+
+        .console-line.info {
+            color: #60a5fa;
+        }
+
+        .module-info {
+            margin-top: 2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem 0;
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JavaScript 模块加载器</h1>
+            <p class="subtitle">在浏览器中动态加载JavaScript模块，管理依赖关系并可视化加载过程</p>
+        </header>
+
+        <div class="main-content">
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-cubes"></i>
+                    <h2>模块管理器</h2>
+                </div>
+                
+                <div class="module-controls">
+                    <button class="btn" id="loadAllBtn">
+                        <i class="fas fa-download"></i> 加载所有模块
+                    </button>
+                    <button class="btn btn-success" id="runDemoBtn">
+                        <i class="fas fa-play"></i> 运行演示
+                    </button>
+                    <button class="btn btn-warning" id="resetBtn">
+                        <i class="fas fa-redo"></i> 重置状态
+                    </button>
+                </div>
+                
+                <div class="module-list">
+                    <div class="module-card" data-module="core">
+                        <div class="module-icon">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="module-name">核心模块</div>
+                        <div class="module-status">未加载</div>
+                    </div>
+                    
+                    <div class="module-card" data-module="utils">
+                        <div class="module-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="module-name">工具模块</div>
+                        <div class="module-status">未加载</div>
+                    </div>
+                    
+                    <div class="module-card" data-module="math">
+                        <div class="module-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="module-name">数学模块</div>
+                        <div class="module-status">未加载</div>
+                    </div>
+                    
+                    <div class="module-card" data-module="ui">
+                        <div class="module-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div class="module-name">UI模块</div>
+                        <div class="module-status">未加载</div>
+                    </div>
+                    
+                    <div class="module-card" data-module="api">
+                        <div class="module-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="module-name">API模块</div>
+                        <div class="module-status">未加载</div>
+                    </div>
+                    
+                    <div class="module-card" data-module="app">
+                        <div class="module-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="module-name">应用模块</div>
+                        <div class="module-status">未加载</div>
+                    </div>
+                </div>
+                
+                <div class="dependency-graph">
+                    <div class="canvas-container">
+                        <canvas id="dependencyCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-title">
+                    <i class="fas fa-terminal"></i>
+                    <h2>控制台输出</h2>
+                </div>
+                
+                <div class="console">
+                    <div class="console-title">
+                        <i class="fas fa-code"></i>
+                        <span style="margin-left:10px;">模块加载日志</span>
+                    </div>
+                    <div id="consoleContent">
+                        <div class="console-line">系统已就绪，等待操作...</div>
+                    </div>
+                </div>
+                
+                <div class="module-info">
+                    <div class="panel-title">
+                        <i class="fas fa-chart-bar"></i>
+                        <h2>模块信息</h2>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <i class="fas fa-download"></i>
+                            <div class="info-value" id="loadedCount">0</div>
+                            <div class="info-label">已加载模块</div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-code-branch"></i>
+                            <div class="info-value" id="dependencyCount">0</div>
+                            <div class="info-label">依赖关系</div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-bolt"></i>
+                            <div class="info-value" id="functionCount">0</div>
+                            <div class="info-label">可用函数</div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <i class="fas fa-memory"></i>
+                            <div class="info-value" id="memoryUsage">0 KB</div>
+                            <div class="info-label">内存占用</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>JavaScript模块加载器示例 | 纯前端实现 | 动态加载JS文件</p>
+        </div>
+    </div>
+
+    <script>
+        // 模块系统实现
+        const ModuleLoader = (() => {
+            // 已加载模块缓存
+            const modules = {};
+            
+            // 模块依赖关系
+            const dependencies = {
+                'core': [],
+                'utils': ['core'],
+                'math': ['utils'],
+                'ui': ['utils', 'core'],
+                'api': ['core', 'utils'],
+                'app': ['core', 'utils', 'math', 'ui', 'api']
+            };
+            
+            // 模块元数据
+            const moduleMeta = {
+                'core': { name: '核心模块', icon: 'microchip', color: '#4361ee' },
+                'utils': { name: '工具模块', icon: 'tools', color: '#4cc9f0' },
+                'math': { name: '数学模块', icon: 'calculator', color: '#f59e0b' },
+                'ui': { name: 'UI模块', icon: 'palette', color: '#8b5cf6' },
+                'api': { name: 'API模块', icon: 'cloud', color: '#10b981' },
+                'app': { name: '应用模块', icon: 'rocket', color: '#ec4899' }
+            };
+            
+            // 模块加载状态
+            const moduleStatus = {
+                'core': 'pending',
+                'utils': 'pending',
+                'math': 'pending',
+                'ui': 'pending',
+                'api': 'pending',
+                'app': 'pending'
+            };
+            
+            // 加载单个模块
+            function loadModule(moduleName) {
+                return new Promise((resolve, reject) => {
+                    // 如果模块已加载，直接返回
+                    if (modules[moduleName]) {
+                        resolve();
+                        return;
+                    }
+                    
+                    // 更新状态为加载中
+                    moduleStatus[moduleName] = 'loading';
+                    updateModuleUI(moduleName);
+                    
+                    // 模拟模块文件加载
+                    setTimeout(() => {
+                        // 创建script元素
+                        const script = document.createElement('script');
+                        
+                        // 设置模块内容
+                        script.textContent = createModuleContent(moduleName);
+                        
+                        // 添加到文档
+                        document.head.appendChild(script);
+                        
+                        // 创建模块对象
+                        modules[moduleName] = {
+                            name: moduleName,
+                            functions: createModuleFunctions(moduleName),
+                            dependencies: dependencies[moduleName],
+                            size: Math.floor(Math.random() * 30) + 10
+                        };
+                        
+                        // 更新状态为已加载
+                        moduleStatus[moduleName] = 'loaded';
+                        updateModuleUI(moduleName);
+                        updateConsole(`${moduleMeta[moduleName].name} 加载成功`, 'success');
+                        
+                        resolve();
+                        
+                        // 清理
+                        setTimeout(() => document.head.removeChild(script), 100);
+                    }, 1000 + Math.random() * 1000);
+                });
+            }
+            
+            // 加载模块及其依赖
+            async function loadModuleWithDependencies(moduleName) {
+                // 检查依赖
+                const deps = dependencies[moduleName];
+                
+                // 先加载所有依赖
+                for (const dep of deps) {
+                    if (moduleStatus[dep] !== 'loaded') {
+                        await loadModuleWithDependencies(dep);
+                    }
+                }
+                
+                // 加载当前模块
+                if (moduleStatus[moduleName] !== 'loaded') {
+                    await loadModule(moduleName);
+                }
+            }
+            
+            // 创建模拟模块内容
+            function createModuleContent(moduleName) {
+                const funcs = createModuleFunctions(moduleName);
+                const funcNames = Object.keys(funcs).join(', ');
+                
+                return `
+                    // ${moduleMeta[moduleName].name}
+                    console.log("${moduleMeta[moduleName].name}已初始化");
+                    window.${moduleName}Module = {
+                        ${Object.entries(funcs).map(([name, desc]) => 
+                            `${name}: function() { 
+                                console.log("调用: ${desc}"); 
+                                return "${name} 执行结果";
+                            }`).join(',\n')}
+                    };
+                `;
+            }
+            
+            // 创建模块函数
+            function createModuleFunctions(moduleName) {
+                const functions = {
+                    'core': {
+                        'init': '初始化核心系统',
+                        'getConfig': '获取系统配置'
+                    },
+                    'utils': {
+                        'formatDate': '格式化日期',
+                        'debounce': '防抖函数',
+                        'throttle': '节流函数'
+                    },
+                    'math': {
+                        'add': '加法运算',
+                        'multiply': '乘法运算',
+                        'calculate': '复杂计算'
+                    },
+                    'ui': {
+                        'render': '渲染UI组件',
+                        'update': '更新UI状态',
+                        'animate': '执行动画效果'
+                    },
+                    'api': {
+                        'fetchData': '获取API数据',
+                        'sendData': '发送数据到API',
+                        'handleError': '处理API错误'
+                    },
+                    'app': {
+                        'start': '启动应用程序',
+                        'run': '运行主逻辑',
+                        'getResult': '获取最终结果'
+                    }
+                };
+                
+                return functions[moduleName] || {};
+            }
+            
+            // 获取模块信息
+            function getModuleInfo() {
+                return {
+                    modules,
+                    dependencies,
+                    moduleStatus,
+                    moduleMeta
+                };
+            }
+            
+            // 重置所有模块
+            function resetModules() {
+                for (const module in modules) {
+                    delete modules[module];
+                }
+                
+                for (const module in moduleStatus) {
+                    moduleStatus[module] = 'pending';
+                }
+            }
+            
+            return {
+                loadModuleWithDependencies,
+                getModuleInfo,
+                resetModules
+            };
+        })();
+        
+        // UI更新函数
+        function updateModuleUI(moduleName) {
+            const card = document.querySelector(`.module-card[data-module="${moduleName}"]`);
+            if (!card) return;
+            
+            const statusElement = card.querySelector('.module-status');
+            const icon = card.querySelector('.module-icon i');
+            
+            // 移除所有状态类
+            card.classList.remove('loaded', 'failed', 'loading');
+            
+            switch (ModuleLoader.getModuleInfo().moduleStatus[moduleName]) {
+                case 'loaded':
+                    card.classList.add('loaded');
+                    statusElement.textContent = '已加载';
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    break;
+                case 'loading':
+                    card.classList.add('loading');
+                    statusElement.textContent = '加载中...';
+                    icon.classList.add('fa-spinner', 'fa-spin');
+                    break;
+                case 'failed':
+                    card.classList.add('failed');
+                    statusElement.textContent = '加载失败';
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    break;
+                default:
+                    statusElement.textContent = '未加载';
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+            }
+        }
+        
+        // 更新控制台
+        function updateConsole(message, type = 'info') {
+            const consoleElement = document.getElementById('consoleContent');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            
+            // 添加时间戳
+            const now = new Date();
+            const timestamp = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+            
+            line.innerHTML = `<span class="timestamp">${timestamp}</span> ${message}`;
+            consoleElement.appendChild(line);
+            
+            // 滚动到底部
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+        }
+        
+        // 绘制依赖关系图
+        function drawDependencyGraph() {
+            const canvas = document.getElementById('dependencyCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            
+            // 设置canvas尺寸
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const moduleInfo = ModuleLoader.getModuleInfo();
+            const modules = Object.keys(moduleInfo.modules);
+            const status = moduleInfo.moduleStatus;
+            const meta = moduleInfo.moduleMeta;
+            
+            // 如果没有加载任何模块，显示提示
+            if (modules.length === 0) {
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#94a3b8';
+                ctx.textAlign = 'center';
+                ctx.fillText('加载模块以查看依赖关系图', canvas.width/2, canvas.height/2);
+                return;
+            }
+            
+            // 计算节点位置
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(canvas.width, canvas.height) * 0.3;
+            const angleStep = (Math.PI * 2) / modules.length;
+            
+            const nodePositions = {};
+            let currentAngle = -Math.PI / 2;
+            
+            // 绘制连接线
+            modules.forEach(module => {
+                const deps = moduleInfo.dependencies[module] || [];
+                deps.forEach(dep => {
+                    if (nodePositions[module] && nodePositions[dep]) {
+                        ctx.beginPath();
+                        ctx.moveTo(nodePositions[module].x, nodePositions[module].y);
+                        ctx.lineTo(nodePositions[dep].x, nodePositions[dep].y);
+                        ctx.strokeStyle = '#cbd5e1';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        
+                        // 绘制箭头
+                        drawArrow(ctx, nodePositions[dep].x, nodePositions[dep].y, 
+                                  nodePositions[module].x, nodePositions[module].y);
+                    }
+                });
+            });
+            
+            // 绘制节点
+            modules.forEach((module, index) => {
+                const x = centerX + Math.cos(currentAngle) * radius;
+                const y = centerY + Math.sin(currentAngle) * radius;
+                nodePositions[module] = { x, y };
+                
+                // 绘制节点
+                const radius = 30;
+                const gradient = ctx.createRadialGradient(x, y, 5, x, y, radius);
+                gradient.addColorStop(0, status[module] === 'loaded' ? meta[module].color : '#94a3b8');
+                gradient.addColorStop(1, status[module] === 'loaded' ? meta[module].color + 'aa' : '#94a3b8aa');
+                
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // 绘制模块图标
+                ctx.fillStyle = 'white';
+                ctx.font = '20px FontAwesome';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(getIconCode(meta[module].icon), x, y);
+                
+                // 绘制模块名称
+                ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = '#1e293b';
+                ctx.fillText(meta[module].name, x, y + 40);
+                
+                currentAngle += angleStep;
+            });
+        }
+        
+        // 绘制箭头
+        function drawArrow(ctx, fromX, fromY, toX, toY) {
+            const headLength = 10;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI/6), toY - headLength * Math.sin(angle - Math.PI/6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI/6), toY - headLength * Math.sin(angle + Math.PI/6));
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        // 获取FontAwesome图标代码
+        function getIconCode(iconName) {
+            const icons = {
+                'microchip': '\uf2db',
+                'tools': '\uf7d9',
+                'calculator': '\uf1ec',
+                'palette': '\uf53f',
+                'cloud': '\uf0c2',
+                'rocket': '\uf135'
+            };
+            return icons[iconName] || '\uf05a';
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            const moduleInfo = ModuleLoader.getModuleInfo();
+            const loadedModules = Object.values(moduleInfo.moduleStatus).filter(s => s === 'loaded').length;
+            
+            // 计算依赖数量
+            let dependencyCount = 0;
+            for (const deps of Object.values(moduleInfo.dependencies)) {
+                dependencyCount += deps.length;
+            }
+            
+            // 计算函数数量
+            let functionCount = 0;
+            for (const module of Object.values(moduleInfo.modules)) {
+                functionCount += Object.keys(module.functions).length;
+            }
+            
+            // 更新UI
+            document.getElementById('loadedCount').textContent = loadedModules;
+            document.getElementById('dependencyCount').textContent = dependencyCount;
+            document.getElementById('functionCount').textContent = functionCount;
+            document.getElementById('memoryUsage').textContent = `${loadedModules * 25} KB`;
+        }
+        
+        // 初始化事件监听
+        function initEvents() {
+            // 加载所有模块按钮
+            document.getElementById('loadAllBtn').addEventListener('click', async () => {
+                updateConsole('开始加载所有模块...', 'info');
+                
+                try {
+                    await ModuleLoader.loadModuleWithDependencies('app');
+                    updateConsole('所有模块加载完成！', 'success');
+                } catch (error) {
+                    updateConsole(`加载失败: ${error.message}`, 'error');
+                }
+                
+                updateStats();
+                drawDependencyGraph();
+            });
+            
+            // 运行演示按钮
+            document.getElementById('runDemoBtn').addEventListener('click', () => {
+                const moduleInfo = ModuleLoader.getModuleInfo();
+                
+                if (moduleInfo.moduleStatus.app !== 'loaded') {
+                    updateConsole('请先加载所有模块', 'warning');
+                    return;
+                }
+                
+                updateConsole('启动应用程序...', 'info');
+                updateConsole('调用: appModule.start()', 'info');
+                updateConsole('> 应用初始化完成', 'success');
+                updateConsole('调用: appModule.run()', 'info');
+                updateConsole('> 数据处理中...', 'info');
+                
+                setTimeout(() => {
+                    updateConsole('调用: mathModule.calculate()', 'info');
+                    updateConsole('> 计算结果: 42', 'success');
+                    updateConsole('调用: uiModule.render()', 'info');
+                    updateConsole('> UI渲染完成', 'success');
+                    updateConsole('调用: appModule.getResult()', 'info');
+                    updateConsole('> 最终结果: "模块系统运行成功！"', 'success');
+                }, 1000);
+            });
+            
+            // 重置按钮
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                ModuleLoader.resetModules();
+                
+                // 重置UI状态
+                document.querySelectorAll('.module-card').forEach(card => {
+                    card.classList.remove('loaded', 'failed', 'loading');
+                    const status = card.querySelector('.module-status');
+                    status.textContent = '未加载';
+                    
+                    const icon = card.querySelector('.module-icon i');
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                });
+                
+                // 清空控制台
+                document.getElementById('consoleContent').innerHTML = 
+                    '<div class="console-line">系统已重置，等待操作...</div>';
+                
+                // 重置统计
+                updateStats();
+                drawDependencyGraph();
+            });
+        }
+        
+        // 初始化
+        window.addEventListener('load', () => {
+            initEvents();
+            drawDependencyGraph();
+            
+            // 初始统计
+            updateStats();
+            
+            // 调整大小时重绘图
+            window.addEventListener('resize', drawDependencyGraph);
+        });
+    </script>
+</body>
+</html>

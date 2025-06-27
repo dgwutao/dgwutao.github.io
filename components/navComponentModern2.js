@@ -203,15 +203,6 @@ class CustomNav extends HTMLElement {
     shadow.innerHTML = html;
   }
 
-//   <div class="header-actions">
-//                     <div class="action-btn">
-//                         <i class="fas fa-search"></i>
-//                     </div>
-//                     <div class="action-btn">
-//                         <i class="fas fa-globe"></i>
-//                     </div>
-//                 </div>
-
   disconnectedCallback(){
 
   }
